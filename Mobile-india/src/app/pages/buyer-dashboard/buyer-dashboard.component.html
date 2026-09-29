@@ -1,0 +1,164 @@
+<div class="buyer-dashboard-page container">
+
+  <!-- Buyer Profile Header Banner -->
+  <header class="buyer-header-card card">
+    <div class="buyer-info">
+      <div class="buyer-avatar">
+        👤
+      </div>
+      <div class="buyer-text">
+        <div class="buyer-name-row">
+          <h1 class="buyer-title">{{ user ? user.name : 'Guest Buyer' }}</h1>
+          <span class="badge badge-discount">Verified Buyer Account</span>
+        </div>
+        <p class="buyer-contact">
+          Mobile: {{ user ? '+91 ' + user.phone : 'Not logged in' }}
+        </p>
+      </div>
+    </div>
+
+    <div class="buyer-header-actions">
+      @if (user) {
+        <button type="button" class="btn btn-outline btn-sm" (click)="logout()">
+          Log Out
+        </button>
+      } @else {
+        <button type="button" class="btn btn-primary btn-sm" (click)="marketplace.isAuthModalOpen.set(true)">
+          Login as Buyer
+        </button>
+      }
+    </div>
+  </header>
+
+  <div class="dashboard-grid">
+
+    <!-- Left Column: Cart & Saved Devices -->
+    <div class="cart-column">
+      <div class="column-header">
+        <h2 class="section-title">My Cart & Reserved Devices ({{ cartItems.length }})</h2>
+        @if (cartItems.length > 0) {
+          <button type="button" class="btn-clear" (click)="marketplace.clearCart()">Clear All</button>
+        }
+      </div>
+
+      @if (cartItems.length > 0) {
+        <div class="cart-list">
+          @for (item of cartItems; track item.id) {
+            <div class="cart-item-card card">
+              <img [src]="item.images[0]" [alt]="item.model" class="cart-thumb" />
+
+              <div class="cart-details">
+                <div class="cart-title-row">
+                  <a [routerLink]="['/phone', item.id]" class="cart-item-title">
+                    {{ item.brand }} {{ item.model }} ({{ item.storage }})
+                  </a>
+                  <button type="button" class="btn-remove" (click)="removeItem(item.id)" title="Remove item">✕</button>
+                </div>
+
+                <div class="cart-specs-row">
+                  <span class="badge badge-condition">{{ item.condition }}</span>
+                  @if (item.batteryHealth) {
+                    <span class="spec-pill">{{ item.batteryHealth }}% Battery</span>
+                  }
+                  <span class="spec-pill">{{ item.color }}</span>
+                </div>
+
+                <div class="cart-price-row">
+                  <span class="price-val">₹{{ item.price.toLocaleString('en-IN') }}</span>
+                  @if (item.mrp > item.price) {
+                    <span class="price-strike">₹{{ item.mrp.toLocaleString('en-IN') }}</span>
+                  }
+                </div>
+
+                <!-- Shop Meta -->
+                <div class="cart-shop-meta">
+                  <span>🏪 <strong>{{ item.shopName }}</strong> ({{ item.shopLocality }} • {{ item.shopDistanceKm }} km away)</span>
+                </div>
+
+                <!-- Action CTAs -->
+                <div class="cart-actions-row">
+                  <button type="button" class="btn btn-whatsapp btn-sm" (click)="inquireWhatsApp(item)">
+                    <span>Chat on WhatsApp</span>
+                  </button>
+                  <button type="button" class="btn btn-outline btn-sm" (click)="callShop(item)">
+                    <span>Call Shop</span>
+                  </button>
+                  <button type="button" class="btn btn-outline btn-sm" (click)="getDirections(item)">
+                    <span>📍 Directions</span>
+                  </button>
+                </div>
+
+              </div>
+            </div>
+          }
+        </div>
+      } @else {
+        <!-- Empty Cart -->
+        <div class="empty-cart card">
+          <div class="empty-icon">🛒</div>
+          <h3>Your Cart is Empty</h3>
+          <p>Browse pre-owned phones from verified local shops in {{ marketplace.currentCity() }} and add them here to compare and visit shops.</p>
+          <a routerLink="/" class="btn btn-primary">
+            Explore Used Phones →
+          </a>
+        </div>
+      }
+    </div>
+
+    <!-- Right Column: Summary & Shop Visit Guide -->
+    <div class="sidebar-column">
+      
+      <!-- Summary Card -->
+      @if (cartItems.length > 0) {
+        <div class="summary-card card">
+          <h3 class="summary-title">Cart Summary</h3>
+
+          <div class="summary-row">
+            <span>Selected Phones:</span>
+            <strong>{{ cartItems.length }} devices</strong>
+          </div>
+
+          <div class="summary-row">
+            <span>Total Market Value (MRP):</span>
+            <span class="strike-muted">₹{{ totalCartMrp.toLocaleString('en-IN') }}</span>
+          </div>
+
+          <div class="summary-row">
+            <span>Total MobiMarket Price:</span>
+            <span class="highlight-price">₹{{ totalCartPrice.toLocaleString('en-IN') }}</span>
+          </div>
+
+          <div class="savings-pill">
+            🎉 You save ₹{{ totalSavings.toLocaleString('en-IN') }} vs Buying New!
+          </div>
+
+          <div class="inspection-reminder">
+            🛡️ <strong>Zero advance payment required:</strong> Visit the respective local shops, physically test each device, and pay cash or UPI directly with a shop warranty bill.
+          </div>
+        </div>
+      }
+
+      <!-- Testing Checklist Guide -->
+      <div class="guide-card card">
+        <h3 class="guide-title">📋 Buyer Checklist at the Shop</h3>
+        <ul class="checklist">
+          <li>
+            <strong>1. Check IMEI:</strong> Dial <code>*#06#</code> to match IMEI with the bill/box.
+          </li>
+          <li>
+            <strong>2. Battery Health:</strong> Verify genuine battery health in device settings.
+          </li>
+          <li>
+            <strong>3. Screen & Touch:</strong> Test all screen areas, cameras, and speaker.
+          </li>
+          <li>
+            <strong>4. Collect Warranty:</strong> Ask the shop owner for your 15–30 day testing warranty receipt.
+          </li>
+        </ul>
+      </div>
+
+    </div>
+
+  </div>
+
+</div>

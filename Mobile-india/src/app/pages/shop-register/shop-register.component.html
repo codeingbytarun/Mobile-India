@@ -1,0 +1,198 @@
+<div class="register-page container">
+
+  <div class="register-layout">
+    
+    <!-- Left Hero & Benefits -->
+    <div class="benefits-panel">
+      <span class="badge badge-verified">Shopkeeper Partner Program</span>
+      <h1 class="benefits-title">Digitize Your Mobile Shop in 2 Minutes</h1>
+      <p class="benefits-sub">
+        Join 100+ local mobile shop owners getting direct walk-in customers and WhatsApp inquiries every day.
+      </p>
+
+      <div class="perks-list">
+        <div class="perk-item">
+          <div class="perk-icon">🏪</div>
+          <div class="perk-text">
+            <strong>Your Dedicated Online Storefront</strong>
+            <span>Get your personal link (e.g. <code>mobimarket.in/shop/your-shop</code>) to share on WhatsApp status.</span>
+          </div>
+        </div>
+
+        <div class="perk-item">
+          <div class="perk-icon">💬</div>
+          <div class="perk-text">
+            <strong>Direct Customer WhatsApp Leads</strong>
+            <span>Zero middleman commission. Buyers contact you directly on your phone or WhatsApp.</span>
+          </div>
+        </div>
+
+        <div class="perk-item">
+          <div class="perk-icon">⚡</div>
+          <div class="perk-text">
+            <strong>1-Tap Inventory Control</strong>
+            <span>Upload used phones in under 60 seconds with instant "Mark as Sold" toggle.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: Registration Form -->
+    <div class="form-panel card">
+      <div class="form-header">
+        <h2>Register Your Shop</h2>
+        <p>Enter your store details below to create your merchant account.</p>
+      </div>
+
+      <form (submit)="$event.preventDefault(); onSubmit()" class="reg-form">
+        
+        <div class="form-group">
+          <label>Shop / Business Name *</label>
+          <input
+            type="text"
+            class="form-input"
+            placeholder="e.g. Balaji Mobile Care"
+            [(ngModel)]="shopData.shopName"
+            name="shopName"
+            required
+          />
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Proprietor / Owner Name *</label>
+            <input
+              type="text"
+              class="form-input"
+              placeholder="e.g. Rajesh Kumar"
+              [(ngModel)]="shopData.ownerName"
+              name="ownerName"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label>City *</label>
+            <select [(ngModel)]="shopData.city" name="city" class="form-input">
+              @for (city of marketplace.availableCities; track city) {
+                <option [value]="city">{{ city }}</option>
+              }
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Calling Phone Number *</label>
+            <div class="phone-input-wrap">
+              <span class="country-code">+91</span>
+              <input
+                type="tel"
+                class="form-input phone-field"
+                placeholder="98290 12345"
+                [(ngModel)]="shopData.phone"
+                name="phone"
+                required
+              />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>WhatsApp Number</label>
+            <div class="phone-input-wrap">
+              <span class="country-code">+91</span>
+              <input
+                type="tel"
+                class="form-input phone-field"
+                placeholder="Same as phone or WhatsApp"
+                [(ngModel)]="shopData.whatsapp"
+                name="whatsapp"
+              />
+            </div>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Market Hub / Locality *</label>
+            <input
+              type="text"
+              class="form-input"
+              placeholder="e.g. Malviya Nagar, Gaurav Tower"
+              [(ngModel)]="shopData.locality"
+              name="locality"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label>Operating Hours</label>
+            <input
+              type="text"
+              class="form-input"
+              placeholder="e.g. 10:00 AM - 9:30 PM"
+              [(ngModel)]="shopData.openHours"
+              name="openHours"
+            />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Full Physical Shop Address *</label>
+          <textarea
+            class="form-input"
+            rows="2"
+            placeholder="Shop number, floor, market complex name, landmark..."
+            [(ngModel)]="shopData.address"
+            name="address"
+            required
+          ></textarea>
+        </div>
+
+        <div class="form-group">
+          <label>Google Maps Location Link (for Buyer Turn-by-Turn Navigation)</label>
+          <div class="map-input-wrap">
+            <span class="map-icon">📍</span>
+            <input
+              type="url"
+              class="form-input map-field"
+              placeholder="e.g. https://maps.app.goo.gl/... or paste Google Maps pin"
+              [(ngModel)]="shopData.googleMapsUrl"
+              name="googleMapsUrl"
+            />
+          </div>
+          <span class="help-text">
+            💡 <em>How to get:</em> Open Google Maps app → Search your shop → Tap <strong>Share</strong> → Tap <strong>Copy link</strong> and paste here.
+          </span>
+        </div>
+
+        <div class="form-group">
+          <label>Select Storefront Theme Photo</label>
+          <div class="photo-selector-grid">
+            @for (opt of imageOptions; track opt.url) {
+              <div
+                class="photo-opt-card"
+                [class.selected-photo]="shopData.image === opt.url"
+                (click)="shopData.image = opt.url"
+              >
+                <img [src]="opt.url" [alt]="opt.label" />
+                <span>{{ opt.label }}</span>
+              </div>
+            }
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary submit-btn">
+          Create Digital Storefront & Open Dashboard →
+        </button>
+
+        <p class="terms-note">
+          By registering, you confirm that your shop is a legitimate physical mobile store adhering to testing warranties for buyers.
+        </p>
+
+      </form>
+    </div>
+
+  </div>
+
+</div>

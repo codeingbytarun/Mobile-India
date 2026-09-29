@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <defs>
+    <linearGradient id="mobiGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1e3a8a" />
+      <stop offset="50%" stop-color="#2563eb" />
+      <stop offset="100%" stop-color="#0284c7" />
+    </linearGradient>
+    <linearGradient id="phoneScreen" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#0b1329" />
+      <stop offset="100%" stop-color="#1e293b" />
+    </linearGradient>
+    <linearGradient id="mGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8" />
+      <stop offset="100%" stop-color="#ffffff" />
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="2" stdDeviation="2.5" flood-color="#0f172a" flood-opacity="0.35"/>
+    </filter>
+  </defs>
+
+  <!-- Squircle App Icon Base -->
+  <rect width="64" height="64" rx="16" fill="url(#mobiGrad)" />
+  <rect x="1" y="1" width="62" height="62" rx="15" stroke="rgba(255,255,255,0.22)" stroke-width="1.5" />
+
+  <!-- Smartphone Frame with Glass Screen -->
+  <g filter="url(#shadow)">
+    <!-- Outer phone body -->
+    <rect x="17" y="9" width="30" height="46" rx="7" fill="url(#phoneScreen)" stroke="#ffffff" stroke-width="2.2" />
+    
+    <!-- Phone speaker slit & sensor -->
+    <rect x="27.5" y="12.5" width="9" height="1.8" rx="0.9" fill="#94a3b8" />
+    <circle cx="24.5" cy="13.4" r="0.9" fill="#64748b" />
+
+    <!-- Stylized 'M' Icon on screen -->
+    <path d="M 23 37 L 23 23 L 28.5 30 L 32 24.5 L 35.5 30 L 41 23 L 41 37" 
+          stroke="url(#mGrad)" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+
+    <!-- Home indicator pill -->
+    <rect x="26.5" y="50" width="11" height="1.8" rx="0.9" fill="#94a3b8" opacity="0.85" />
+  </g>
+
+  <!-- Verified Trust Badge (bottom right) -->
+  <g filter="url(#shadow)">
+    <circle cx="46" cy="46" r="8" fill="#10b981" stroke="#ffffff" stroke-width="2" />
+    <!-- Checkmark -->
+    <path d="M42.5 46.2 L45 48.7 L49.5 43.5" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+  </g>
+</svg>

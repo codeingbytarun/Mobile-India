@@ -1,0 +1,742 @@
+<div class="seller-dashboard-page container">
+
+  @if (isShopkeeperLoggedIn || !user) {
+    <!-- Shop Header Banner -->
+    <header class="merchant-banner card">
+      <div class="merchant-info">
+        <img [src]="shop.image" [alt]="shop.name" class="merchant-avatar" />
+        <div class="merchant-text">
+          <div class="merchant-name-row">
+            <h1 class="merchant-title">{{ shop.name }}</h1>
+            <span class="badge badge-verified">✓ Verified Partner</span>
+          </div>
+          <p class="merchant-sub">
+            Digital Storefront: 
+            <a [routerLink]="['/shop', shop.id]" target="_blank" class="store-link">
+              mobimarket.in/shop/{{ shop.slug }}
+            </a>
+          </p>
+        </div>
+      </div>
+
+      <div class="merchant-top-actions">
+        <button type="button" class="btn btn-whatsapp" (click)="shareStorefrontOnWhatsApp()">
+          <span>Share Storefront on WhatsApp</span>
+        </button>
+        <button type="button" class="btn btn-primary" (click)="showAddModal = true">
+          <span>+ List New Phone</span>
+        </button>
+      </div>
+    </header>
+
+    @if (!user) {
+      <div class="demo-notice card">
+        <div class="demo-text">
+          <strong>👋 Demo Merchant Mode Active:</strong> You are previewing the dashboard for <em>{{ shop.name }}</em>.
+        </div>
+        <div class="demo-actions">
+          <button type="button" class="btn btn-outline btn-sm" (click)="openShopkeeperLogin()">
+            Login with Your Shop Number
+          </button>
+          <a routerLink="/register-shop" class="btn btn-primary btn-sm">
+            + Register New Shop
+          </a>
+        </div>
+      </div>
+    }
+
+    <!-- Metric Analytics Cards -->
+    <section class="analytics-grid">
+      <div class="kpi-card card">
+        <div class="kpi-icon">👁️</div>
+        <div class="kpi-data">
+          <span class="kpi-val">{{ totalViews }}</span>
+          <span class="kpi-label">Listing Views</span>
+        </div>
+        <span class="kpi-trend">+14% this week</span>
+      </div>
+
+      <div class="kpi-card card">
+        <div class="kpi-icon">💬</div>
+        <div class="kpi-data">
+          <span class="kpi-val">{{ totalLeads }}</span>
+          <span class="kpi-label">WhatsApp Leads</span>
+        </div>
+        <span class="kpi-trend trend-green">+22% this week</span>
+      </div>
+
+      <div class="kpi-card card">
+        <div class="kpi-icon">📱</div>
+        <div class="kpi-data">
+          <span class="kpi-val">{{ activeInventoryCount }}</span>
+          <span class="kpi-label">Active Stock</span>
+        </div>
+        <span class="kpi-sub">Ready for buyers</span>
+      </div>
+
+      <div class="kpi-card card">
+        <div class="kpi-icon">✅</div>
+        <div class="kpi-data">
+          <span class="kpi-val">{{ soldInventoryCount }}</span>
+          <span class="kpi-label">Phones Sold</span>
+        </div>
+        <span class="kpi-sub">Marked as sold</span>
+      </div>
+    </section>
+
+    <!-- Inventory Management Table / List -->
+    <section class="inventory-card card">
+      <div class="inventory-table-header">
+        <div>
+          <h2 class="section-title">My Shop Inventory</h2>
+          <p class="section-sub">1-Tap 'Mark as Sold' when a walk-in customer purchases a device.</p>
+        </div>
+        <button type="button" class="btn btn-primary btn-sm" (click)="showAddModal = true">
+          + Add Listing
+        </button>
+      </div>
+
+      <div class="table-responsive">
+        <table class="inventory-table">
+          <thead>
+            <tr>
+              <th>Phone Details</th>
+              <th>Condition</th>
+              <th>Listed Price</th>
+              <th>Views / Leads</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (item of myInventory; track item.id) {
+              <tr [class.row-sold]="item.isSold">
+                <!-- Details -->
+                <td>
+                  <div class="table-phone-cell">
+                    <div class="table-thumb-wrapper" (click)="openPhotoManager(item)" title="Click to view & manage photos">
+                      <img [src]="item.images[0]" [alt]="item.model" class="table-thumb" />
+                      <span class="table-thumb-count">📷 {{ item.images.length }}</span>
+                    </div>
+                    <div class="table-phone-info">
+                      <span class="table-model">{{ item.brand }} {{ item.model }}</span>
+                      <span class="table-specs">{{ item.storage }} • {{ item.ram }} RAM • {{ item.color }}</span>
+                      <button type="button" class="btn-manage-photos-link" (click)="openPhotoManager(item)">
+                        🖼️ Manage {{ item.images.length }} Photo{{ item.images.length === 1 ? '' : 's' }}
+                      </button>
+                    </div>
+                  </div>
+                </td>
+
+                <!-- Condition -->
+                <td>
+                  <span class="badge badge-condition" [ngClass]="{'badge-pristine': item.condition === 'Pristine'}">
+                    {{ item.condition }}
+                  </span>
+                  @if (item.batteryHealth) {
+                    <span class="battery-tag">{{ item.batteryHealth }}%</span>
+                  }
+                </td>
+
+                <!-- Price (with inline edit) -->
+                <td>
+                  @if (editingPricePhoneId === item.id) {
+                    <div class="price-edit-box">
+                      <input type="number" [(ngModel)]="newPriceValue" class="price-input" />
+                      <button type="button" class="btn btn-primary btn-sm" (click)="savePriceEdit(item.id)">Save</button>
+                      <button type="button" class="btn btn-outline btn-sm" (click)="cancelPriceEdit()">✕</button>
+                    </div>
+                  } @else {
+                    <div class="price-display-box">
+                      <span class="cell-price">₹{{ item.price.toLocaleString('en-IN') }}</span>
+                      <button type="button" class="edit-price-btn" (click)="startPriceEdit(item)" title="Edit Price">✏️</button>
+                    </div>
+                  }
+                </td>
+
+                <!-- Views / Leads -->
+                <td>
+                  <div class="metrics-cell">
+                    <span>{{ item.viewsCount }} views</span>
+                    <span class="leads-count">{{ item.leadsCount }} leads</span>
+                  </div>
+                </td>
+
+                <!-- Status -->
+                <td>
+                  @if (item.isSold) {
+                    <span class="badge badge-sold">SOLD OUT</span>
+                  } @else {
+                    <span class="badge badge-discount">ACTIVE</span>
+                  }
+                </td>
+
+                <!-- Actions -->
+                <td>
+                  <div class="actions-cell">
+                    <button
+                      type="button"
+                      class="btn btn-outline btn-sm btn-action-photos"
+                      (click)="openPhotoManager(item)"
+                      title="Manage / Reorder photos"
+                    >
+                      📷 Photos ({{ item.images.length }})
+                    </button>
+
+                    <button
+                      type="button"
+                      class="btn btn-sm"
+                      [ngClass]="item.isSold ? 'btn-outline' : 'btn-danger'"
+                      (click)="toggleSold(item.id)"
+                    >
+                      {{ item.isSold ? 'Reactivate' : 'Mark as Sold' }}
+                    </button>
+
+                    <button
+                      type="button"
+                      class="btn-delete"
+                      (click)="deletePhone(item.id)"
+                      title="Delete listing"
+                    >
+                      🗑️
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Add New Listing Modal -->
+    @if (showAddModal) {
+      <div class="modal-backdrop">
+        <div class="modal-dialog card">
+          <div class="modal-header">
+            <h2 class="modal-title">List a Pre-Owned Phone</h2>
+            <button type="button" class="close-btn" (click)="showAddModal = false">✕</button>
+          </div>
+
+          <form class="modal-body" (submit)="$event.preventDefault(); submitNewPhone()">
+            <div class="form-row">
+              <div class="form-group">
+                <label>Brand *</label>
+                <select [(ngModel)]="newPhone.brand" name="brand" class="form-input">
+                  <option value="Apple">Apple</option>
+                  <option value="Samsung">Samsung</option>
+                  <option value="OnePlus">OnePlus</option>
+                  <option value="Xiaomi">Xiaomi</option>
+                  <option value="Vivo">Vivo</option>
+                  <option value="Realme">Realme</option>
+                  <option value="Google">Google</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label>Model Name *</label>
+                <input
+                  type="text"
+                  placeholder="e.g. iPhone 13 or 11R"
+                  [(ngModel)]="newPhone.model"
+                  name="model"
+                  class="form-input"
+                  required
+                />
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label>Storage *</label>
+                <select [(ngModel)]="newPhone.storage" name="storage" class="form-input">
+                  <option value="64GB">64GB</option>
+                  <option value="128GB">128GB</option>
+                  <option value="256GB">256GB</option>
+                  <option value="512GB">512GB</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label>RAM</label>
+                <input
+                  type="text"
+                  placeholder="e.g. 6GB, 8GB"
+                  [(ngModel)]="newPhone.ram"
+                  name="ram"
+                  class="form-input"
+                />
+              </div>
+
+              <div class="form-group">
+                <label>Color</label>
+                <input
+                  type="text"
+                  placeholder="e.g. Midnight Blue"
+                  [(ngModel)]="newPhone.color"
+                  name="color"
+                  class="form-input"
+                />
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label>Selling Price (₹) *</label>
+                <input
+                  type="number"
+                  placeholder="e.g. 34999"
+                  [(ngModel)]="newPhone.price"
+                  name="price"
+                  class="form-input"
+                  required
+                />
+              </div>
+
+              <div class="form-group">
+                <label>Original MRP (₹)</label>
+                <input
+                  type="number"
+                  placeholder="e.g. 59900"
+                  [(ngModel)]="newPhone.mrp"
+                  name="mrp"
+                  class="form-input"
+                />
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label>Condition</label>
+                <select [(ngModel)]="newPhone.condition" name="condition" class="form-input">
+                  <option value="Pristine">Pristine (Flawless)</option>
+                  <option value="Like New">Like New</option>
+                  <option value="Good">Good (Minor Marks)</option>
+                  <option value="Fair">Fair (Noticeable scratches)</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label>Battery Health %</label>
+                <input
+                  type="number"
+                  placeholder="e.g. 89"
+                  [(ngModel)]="newPhone.batteryHealth"
+                  name="batteryHealth"
+                  class="form-input"
+                />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Shop Testing Warranty</label>
+              <input
+                type="text"
+                placeholder="e.g. 30-Day Testing Warranty"
+                [(ngModel)]="newPhone.warranty"
+                name="warranty"
+                class="form-input"
+              />
+            </div>
+
+            <div class="form-group">
+              <label class="checkbox-label">
+                <input type="checkbox" [(ngModel)]="newPhone.billBoxAvailable" name="billBox" />
+                <span>Original Bill & Box Available</span>
+              </label>
+            </div>
+
+            <!-- Device Photos Section -->
+            <div class="form-group photos-form-section">
+              <div class="photos-title-row">
+                <label class="photos-main-label">📸 Device Photos (Add Multiple & Choose Order) *</label>
+                <span class="photos-count-indicator">{{ newPhone.images.length }} photo{{ newPhone.images.length === 1 ? '' : 's' }} added</span>
+              </div>
+              <p class="photos-guidance">
+                Upload real photos of the device. <strong>The 1st photo is your main Cover Photo</strong> displayed on search cards and storefronts. Click <strong>"⭐ Make 1st"</strong> or use arrows to choose the order.
+              </p>
+
+              <!-- Upload Dropzone -->
+              <div 
+                class="upload-dropzone" 
+                [class.drag-over]="isDragging"
+                (dragover)="onDragOver($event)"
+                (dragleave)="onDragLeave($event)"
+                (drop)="onFileDrop($event)"
+                (click)="addFileInput.click()"
+              >
+                <input 
+                  type="file" 
+                  #addFileInput 
+                  multiple 
+                  accept="image/*" 
+                  (change)="onFilesSelected($event)" 
+                  style="display: none;" 
+                />
+                <div class="dropzone-inner">
+                  <span class="dropzone-emoji">📤</span>
+                  <div class="dropzone-text-group">
+                    <span class="dropzone-heading">Tap or click to browse photos from phone / PC</span>
+                    <span class="dropzone-sub">Upload multiple real camera photos (JPG, PNG, WEBP)</span>
+                  </div>
+                  <button type="button" class="btn btn-outline btn-sm dropzone-btn">
+                    + Choose Files
+                  </button>
+                </div>
+              </div>
+
+              <!-- URL Input & Quick Sample Presets -->
+              <div class="photo-auxiliary-tools">
+                <div class="photo-url-bar">
+                  <input 
+                    type="url" 
+                    [(ngModel)]="inputImageUrl" 
+                    name="inputImageUrl"
+                    placeholder="Or paste image web link (https://...)" 
+                    class="form-input url-input"
+                    (keydown.enter)="$event.preventDefault(); addImageFromUrl()"
+                  />
+                  <button 
+                    type="button" 
+                    class="btn btn-outline btn-sm" 
+                    (click)="addImageFromUrl()" 
+                    [disabled]="!inputImageUrl.trim()"
+                  >
+                    + Add URL
+                  </button>
+                </div>
+
+                <div class="preset-suggestions">
+                  <span class="preset-title">Quick sample photos:</span>
+                  <div class="preset-chip-list">
+                    @for (preset of presetPhotos; track preset.url) {
+                      <button 
+                        type="button" 
+                        class="preset-chip" 
+                        (click)="addPresetImage(preset.url)"
+                        title="Add {{ preset.label }}"
+                      >
+                        + {{ preset.label }}
+                      </button>
+                    }
+                  </div>
+                </div>
+              </div>
+
+              <!-- Uploaded Images Reordering Gallery -->
+              @if (newPhone.images.length > 0) {
+                <div class="photos-gallery-area">
+                  <div class="gallery-legend">
+                    <span class="legend-tip">
+                      💡 Click <strong>"⭐ Make 1st"</strong> or select position dropdown to set 1st, 2nd, etc.
+                    </span>
+                  </div>
+
+                  <div class="photos-grid">
+                    @for (img of newPhone.images; track img; let i = $index) {
+                      <div class="photo-card" [class.is-primary]="i === 0">
+                        <!-- Top Tag Bar -->
+                        <div class="photo-card-header">
+                          @if (i === 0) {
+                            <span class="photo-order-tag tag-primary">⭐ 1st (Cover)</span>
+                          } @else if (i === 1) {
+                            <span class="photo-order-tag tag-secondary">2nd Photo</span>
+                          } @else if (i === 2) {
+                            <span class="photo-order-tag tag-normal">3rd Photo</span>
+                          } @else {
+                            <span class="photo-order-tag tag-normal">{{ i + 1 }}th Photo</span>
+                          }
+
+                          <button 
+                            type="button" 
+                            class="photo-delete-btn" 
+                            (click)="removeImage(i)" 
+                            title="Remove photo"
+                          >
+                            ✕
+                          </button>
+                        </div>
+
+                        <!-- Image Preview -->
+                        <div class="photo-thumb-container">
+                          <img [src]="img" [alt]="'Photo ' + (i + 1)" class="photo-img" />
+                        </div>
+
+                        <!-- Action Toolbar -->
+                        <div class="photo-card-actions">
+                          @if (i !== 0) {
+                            <button 
+                              type="button" 
+                              class="btn-make-first" 
+                              (click)="setAsCover(i)"
+                              title="Make this photo the 1st Cover image"
+                            >
+                              ⭐ Make 1st
+                            </button>
+                          } @else {
+                            <span class="active-cover-badge">✓ Main Cover</span>
+                          }
+
+                          <div class="photo-shift-buttons">
+                            <button 
+                              type="button" 
+                              class="btn-nav-shift" 
+                              [disabled]="i === 0" 
+                              (click)="moveImageStep(i, -1)" 
+                              title="Move photo left"
+                            >
+                              ◀
+                            </button>
+
+                            <select 
+                              class="photo-rank-select" 
+                              [ngModel]="i" 
+                              (ngModelChange)="moveImage(i, $event)"
+                              name="rank_{{i}}"
+                              title="Set position"
+                            >
+                              @for (item of newPhone.images; track $index; let pos = $index) {
+                                <option [value]="pos">{{ pos === 0 ? '1st (Cover)' : (pos + 1) + (pos === 1 ? 'nd' : pos === 2 ? 'rd' : 'th') }}</option>
+                              }
+                            </select>
+
+                            <button 
+                              type="button" 
+                              class="btn-nav-shift" 
+                              [disabled]="i === newPhone.images.length - 1" 
+                              (click)="moveImageStep(i, 1)" 
+                              title="Move photo right"
+                            >
+                              ▶
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    }
+                  </div>
+                </div>
+              } @else {
+                <div class="photos-empty-state">
+                  <span>⚠️ No photos added yet. Select photos above or click a sample to continue.</span>
+                </div>
+              }
+            </div>
+
+            <div class="modal-footer">
+              <button type="button" class="btn btn-outline" (click)="showAddModal = false">
+                Cancel
+              </button>
+              <button type="submit" class="btn btn-primary">
+                Publish Listing Immediately
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    }
+
+    <!-- Manage Existing Phone Photos Modal -->
+    @if (editingPhotosPhone) {
+      <div class="modal-backdrop">
+        <div class="modal-dialog card modal-wide">
+          <div class="modal-header">
+            <div>
+              <h2 class="modal-title">Manage Photos — {{ editingPhotosPhone.brand }} {{ editingPhotosPhone.model }}</h2>
+              <p class="modal-subtitle">Upload multiple photos, reorder them, and select which image is 1st (Cover) or 2nd.</p>
+            </div>
+            <button type="button" class="close-btn" (click)="closePhotoManager()">✕</button>
+          </div>
+
+          <div class="modal-body">
+            <!-- Upload Dropzone -->
+            <div 
+              class="upload-dropzone" 
+              [class.drag-over]="isEditingDragging"
+              (dragover)="onExistingDragOver($event)"
+              (dragleave)="onExistingDragLeave($event)"
+              (drop)="onExistingFileDrop($event)"
+              (click)="editFileInput.click()"
+            >
+              <input 
+                type="file" 
+                #editFileInput 
+                multiple 
+                accept="image/*" 
+                (change)="onExistingFilesSelected($event)" 
+                style="display: none;" 
+              />
+              <div class="dropzone-inner">
+                <span class="dropzone-emoji">📤</span>
+                <div class="dropzone-text-group">
+                  <span class="dropzone-heading">Tap or click to browse photos from device</span>
+                  <span class="dropzone-sub">Upload more device photos (Supports multiple file selection)</span>
+                </div>
+                <button type="button" class="btn btn-outline btn-sm dropzone-btn">
+                  + Select Images
+                </button>
+              </div>
+            </div>
+
+            <!-- URL Input & Quick Presets -->
+            <div class="photo-auxiliary-tools">
+              <div class="photo-url-bar">
+                <input 
+                  type="url" 
+                  [(ngModel)]="editingInputImageUrl" 
+                  placeholder="Or paste image web link (https://...)" 
+                  class="form-input url-input"
+                  (keydown.enter)="$event.preventDefault(); addExistingImageUrl()"
+                />
+                <button 
+                  type="button" 
+                  class="btn btn-outline btn-sm" 
+                  (click)="addExistingImageUrl()" 
+                  [disabled]="!editingInputImageUrl.trim()"
+                >
+                  + Add URL
+                </button>
+              </div>
+
+              <div class="preset-suggestions">
+                <span class="preset-title">Quick sample photos:</span>
+                <div class="preset-chip-list">
+                  @for (preset of presetPhotos; track preset.url) {
+                    <button 
+                      type="button" 
+                      class="preset-chip" 
+                      (click)="addExistingPreset(preset.url)"
+                    >
+                      + {{ preset.label }}
+                    </button>
+                  }
+                </div>
+              </div>
+            </div>
+
+            <!-- Uploaded Photos Reordering Grid -->
+            @if (editingPhoneImages.length > 0) {
+              <div class="photos-gallery-area">
+                <div class="gallery-legend">
+                  <span class="legend-tip">
+                    💡 Click <strong>"⭐ Make 1st"</strong> or use <strong>◀ / ▶</strong> to choose which photo appears 1st on search cards and covers.
+                  </span>
+                  <span class="photos-count-indicator">{{ editingPhoneImages.length }} photo{{ editingPhoneImages.length === 1 ? '' : 's' }} in gallery</span>
+                </div>
+
+                <div class="photos-grid">
+                  @for (img of editingPhoneImages; track img; let i = $index) {
+                    <div class="photo-card" [class.is-primary]="i === 0">
+                      <!-- Top Tag Bar -->
+                      <div class="photo-card-header">
+                        @if (i === 0) {
+                          <span class="photo-order-tag tag-primary">⭐ 1st (Cover)</span>
+                        } @else if (i === 1) {
+                          <span class="photo-order-tag tag-secondary">2nd Photo</span>
+                        } @else if (i === 2) {
+                          <span class="photo-order-tag tag-normal">3rd Photo</span>
+                        } @else {
+                          <span class="photo-order-tag tag-normal">{{ i + 1 }}th Photo</span>
+                        }
+
+                        <button 
+                          type="button" 
+                          class="photo-delete-btn" 
+                          (click)="removeExistingImage(i)" 
+                          title="Remove photo"
+                        >
+                          ✕
+                        </button>
+                      </div>
+
+                      <!-- Image Preview -->
+                      <div class="photo-thumb-container">
+                        <img [src]="img" [alt]="'Photo ' + (i + 1)" class="photo-img" />
+                      </div>
+
+                      <!-- Action Toolbar -->
+                      <div class="photo-card-actions">
+                        @if (i !== 0) {
+                          <button 
+                            type="button" 
+                            class="btn-make-first" 
+                            (click)="setExistingAsCover(i)"
+                            title="Make this photo the 1st Cover image"
+                          >
+                            ⭐ Make 1st
+                          </button>
+                        } @else {
+                          <span class="active-cover-badge">✓ Primary Cover</span>
+                        }
+
+                        <div class="photo-shift-buttons">
+                          <button 
+                            type="button" 
+                            class="btn-nav-shift" 
+                            [disabled]="i === 0" 
+                            (click)="moveExistingImageStep(i, -1)" 
+                            title="Move left (closer to 1st)"
+                          >
+                            ◀
+                          </button>
+
+                          <select 
+                            class="photo-rank-select" 
+                            [ngModel]="i" 
+                            (ngModelChange)="moveExistingImage(i, $event)"
+                            title="Set position"
+                          >
+                            @for (item of editingPhoneImages; track $index; let pos = $index) {
+                              <option [value]="pos">{{ pos === 0 ? '1st (Cover)' : (pos + 1) + (pos === 1 ? 'nd' : pos === 2 ? 'rd' : 'th') }}</option>
+                            }
+                          </select>
+
+                          <button 
+                            type="button" 
+                            class="btn-nav-shift" 
+                            [disabled]="i === editingPhoneImages.length - 1" 
+                            (click)="moveExistingImageStep(i, 1)" 
+                            title="Move right"
+                          >
+                            ▶
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  }
+                </div>
+              </div>
+            } @else {
+              <div class="photos-empty-state">
+                <span>⚠️ No photos in gallery. Please keep at least 1 photo for this listing.</span>
+              </div>
+            }
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" class="btn btn-outline" (click)="closePhotoManager()">Cancel</button>
+            <button type="button" class="btn btn-primary" (click)="savePhotoManager()" [disabled]="editingPhoneImages.length === 0">
+              Save Photo Changes
+            </button>
+          </div>
+        </div>
+      </div>
+    }
+  } @else {
+    <!-- Buyer is logged in trying to view seller page -->
+    <div class="card buyer-gate-card">
+      <div class="gate-icon">🏪</div>
+      <h2>Shopkeeper Account Required</h2>
+      <p>You are currently logged in as a <strong>Buyer ({{ user.name }})</strong>. To access the merchant control center, please register your mobile shop or login with your shopkeeper credentials.</p>
+      <div class="gate-actions">
+        <a routerLink="/register-shop" class="btn btn-primary">
+          Register Your Shop (Free)
+        </a>
+        <button type="button" class="btn btn-outline" (click)="openShopkeeperLogin()">
+          Login as Shopkeeper
+        </button>
+      </div>
+    </div>
+  }
+
+</div>

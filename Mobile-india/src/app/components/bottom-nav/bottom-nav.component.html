@@ -1,0 +1,43 @@
+<nav class="bottom-nav-bar mobile-only">
+  <a routerLink="/" routerLinkActive="active-tab" [routerLinkActiveOptions]="{exact: true}" class="nav-tab">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+      <polyline points="9 22 9 12 15 12 15 22"></polyline>
+    </svg>
+    <span>Home</span>
+  </a>
+
+  <a routerLink="/compare" routerLinkActive="active-tab" class="nav-tab">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M16 3h5v5"></path>
+      <path d="M4 20L21 3"></path>
+      <path d="M21 16v5h-5"></path>
+      <path d="M15 15l6 6"></path>
+      <path d="M4 4l5 5"></path>
+    </svg>
+    <span>Compare</span>
+  </a>
+
+  <!-- Mobile Cart Tab with Badge -->
+  <a routerLink="/buyer" routerLinkActive="active-tab" class="nav-tab cart-tab">
+    <div class="cart-icon-wrapper">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="9" cy="21" r="1"></circle>
+        <circle cx="20" cy="21" r="1"></circle>
+        <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+      </svg>
+      @if (marketplace.cart().length > 0) {
+        <span class="mobile-cart-badge">{{ marketplace.cart().length }}</span>
+      }
+    </div>
+    <span>Cart</span>
+  </a>
+
+  <a routerLink="/seller" routerLinkActive="active-tab" class="nav-tab">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+      <circle cx="12" cy="7" r="4"></circle>
+    </svg>
+    <span>Merchant</span>
+  </a>
+</nav>

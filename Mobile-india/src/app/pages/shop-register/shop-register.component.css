@@ -1,0 +1,225 @@
+.register-page {
+  padding-top: 2rem;
+  padding-bottom: 5rem;
+}
+
+.register-layout {
+  display: grid;
+  grid-template-columns: 1fr 1.35fr;
+  gap: 3rem;
+  align-items: start;
+}
+
+.benefits-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.benefits-title {
+  font-size: 2.2rem;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.benefits-sub {
+  font-size: 1.05rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.perks-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  margin-top: 1rem;
+}
+
+.perk-item {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
+.perk-icon {
+  font-size: 1.75rem;
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  padding: 0.5rem;
+  border-radius: var(--radius-md);
+}
+
+.perk-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.perk-text strong {
+  font-size: 1rem;
+  color: var(--text-main);
+}
+
+.perk-text span {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+/* Form Panel */
+.form-panel {
+  padding: 2rem;
+}
+
+.form-header {
+  margin-bottom: 1.5rem;
+}
+
+.form-header h2 {
+  font-size: 1.5rem;
+  font-weight: 800;
+  margin-bottom: 0.25rem;
+}
+
+.form-header p {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+.reg-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.15rem;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.form-group label {
+  font-size: 0.825rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+}
+
+.phone-input-wrap {
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background-color: var(--surface);
+}
+
+.country-code {
+  padding: 0.65rem 0.85rem;
+  background-color: var(--surface-alt);
+  border-right: 1px solid var(--border);
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.phone-field {
+  border: none;
+  border-radius: 0;
+}
+
+.map-input-wrap {
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background-color: var(--surface);
+}
+
+.map-icon {
+  padding: 0.65rem 0.85rem;
+  background-color: var(--surface-alt);
+  border-right: 1px solid var(--border);
+  font-size: 1rem;
+}
+
+.map-field {
+  border: none;
+  border-radius: 0;
+}
+
+.help-text {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-top: 0.25rem;
+}
+
+.photo-selector-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.75rem;
+}
+
+.photo-opt-card {
+  border: 2px solid var(--border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-bottom: 0.5rem;
+  transition: all 0.15s ease;
+}
+
+.photo-opt-card img {
+  width: 100%;
+  height: 70px;
+  object-fit: cover;
+  margin-bottom: 0.35rem;
+}
+
+.photo-opt-card span {
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-align: center;
+  color: var(--text-secondary);
+}
+
+.selected-photo {
+  border-color: var(--primary);
+  background-color: var(--primary-light);
+}
+
+.submit-btn {
+  padding: 0.85rem;
+  font-size: 1rem;
+  margin-top: 0.5rem;
+}
+
+.terms-note {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+@media (max-width: 900px) {
+  .register-layout {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+}
+
+@media (max-width: 580px) {
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+  .photo-selector-grid {
+    grid-template-columns: 1fr;
+  }
+}

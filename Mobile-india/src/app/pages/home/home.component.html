@@ -1,0 +1,194 @@
+<div class="home-page container">
+
+  <!-- Top Hero Banner -->
+  <section class="hero-banner card">
+    <div class="hero-content">
+      <div class="hero-badge">
+        <span class="pulse-dot"></span>
+        <span>100+ Verified Local Shops in {{ marketplace.currentCity() }}</span>
+      </div>
+      <h1 class="hero-title">
+        Buy Inspected Second-Hand Phones From Local Shops
+      </h1>
+      <p class="hero-subtitle">
+        Zero risk of online scams. Inspect the phone in person, verify battery health, and get a physical shop bill with warranty.
+      </p>
+    </div>
+  </section>
+
+  <!-- Brand Quick Selector Carousel -->
+  <section class="brand-bar">
+    <button
+      class="brand-chip"
+      [class.active]="marketplace.filterState().brand === null"
+      (click)="onBrandSelect(null)"
+    >
+      All Brands
+    </button>
+    @for (brand of marketplace.brands; track brand) {
+      <button
+        class="brand-chip"
+        [class.active]="marketplace.filterState().brand === brand"
+        (click)="onBrandSelect(brand)"
+      >
+        {{ brand }}
+      </button>
+    }
+  </section>
+
+  <!-- Main Marketplace Layout (Sidebar + Grid) -->
+  <div class="marketplace-layout">
+
+    <!-- Left Filter Sidebar (Desktop) -->
+    <aside class="filter-sidebar card">
+      <div class="sidebar-header">
+        <h2 class="sidebar-title">Filters</h2>
+        <button type="button" class="reset-link" (click)="resetFilters()">Reset All</button>
+      </div>
+
+      <!-- Price Range Slider -->
+      <div class="filter-group">
+        <div class="filter-label-row">
+          <label class="filter-label">Max Budget</label>
+          <span class="filter-val">₹{{ maxPrice.toLocaleString('en-IN') }}</span>
+        </div>
+        <input
+          type="range"
+          min="10000"
+          max="100000"
+          step="2000"
+          [(ngModel)]="maxPrice"
+          (input)="onPriceChange()"
+          class="range-slider"
+        />
+        <div class="range-labels">
+          <span>₹10,000</span>
+          <span>₹1,00,000+</span>
+        </div>
+      </div>
+
+      <!-- Distance Radius -->
+      <div class="filter-group">
+        <div class="filter-label-row">
+          <label class="filter-label">Distance</label>
+          <span class="filter-val">Within {{ maxDistance }} km</span>
+        </div>
+        <input
+          type="range"
+          min="1"
+          max="30"
+          step="1"
+          [(ngModel)]="maxDistance"
+          (input)="onDistanceChange()"
+          class="range-slider"
+        />
+        <div class="range-labels">
+          <span>1 km</span>
+          <span>30 km</span>
+        </div>
+      </div>
+
+      <!-- Condition Pills -->
+      <div class="filter-group">
+        <label class="filter-label">Condition</label>
+        <div class="filter-options-grid">
+          @for (cond of conditions; track cond) {
+            <button
+              type="button"
+              class="pill-btn"
+              [class.active]="marketplace.filterState().condition === cond"
+              (click)="onConditionSelect(cond)"
+            >
+              {{ cond }}
+            </button>
+          }
+        </div>
+      </div>
+
+      <!-- Storage Pills -->
+      <div class="filter-group">
+        <label class="filter-label">Internal Storage</label>
+        <div class="filter-options-grid">
+          @for (storage of storages; track storage) {
+            <button
+              type="button"
+              class="pill-btn"
+              [class.active]="marketplace.filterState().storage === storage"
+              (click)="onStorageSelect(storage)"
+            >
+              {{ storage }}
+            </button>
+          }
+        </div>
+      </div>
+
+      <!-- Checkboxes -->
+      <div class="filter-group">
+        <label class="checkbox-row">
+          <input
+            type="checkbox"
+            [checked]="marketplace.filterState().onlyBillBox"
+            (change)="toggleBillBox()"
+          />
+          <span class="checkbox-text">Original Bill & Box Available</span>
+        </label>
+      </div>
+
+    </aside>
+
+    <!-- Main Results Column -->
+    <main class="results-column">
+      
+      <!-- Top Bar: Result count & Active filter tags -->
+      <div class="results-header">
+        <div class="results-count">
+          <strong>{{ marketplace.filteredPhones().length }} Phones Available</strong> in {{ marketplace.currentCity() }}
+        </div>
+        @if (marketplace.filterState().brand || marketplace.filterState().condition || marketplace.filterState().searchQuery) {
+          <div class="active-tags-row">
+            @if (marketplace.filterState().brand) {
+              <span class="filter-tag">
+                Brand: {{ marketplace.filterState().brand }}
+                <button (click)="onBrandSelect(null)">✕</button>
+              </span>
+            }
+            @if (marketplace.filterState().condition) {
+              <span class="filter-tag">
+                {{ marketplace.filterState().condition }}
+                <button (click)="onConditionSelect(marketplace.filterState().condition!)">✕</button>
+              </span>
+            }
+            @if (marketplace.filterState().searchQuery) {
+              <span class="filter-tag">
+                "{{ marketplace.filterState().searchQuery }}"
+                <button (click)="marketplace.setSearch('')">✕</button>
+              </span>
+            }
+          </div>
+        }
+      </div>
+
+      <!-- Phones Grid -->
+      @if (marketplace.filteredPhones().length > 0) {
+        <div class="phones-grid">
+          @for (phone of marketplace.filteredPhones(); track phone.id) {
+            <app-phone-card [phone]="phone"></app-phone-card>
+          }
+        </div>
+      } @else {
+        <!-- Empty State -->
+        <div class="empty-state card">
+          <div class="empty-icon">📱</div>
+          <h3>No phones match your current filters</h3>
+          <p>Try expanding your budget, selecting another brand, or increasing your distance radius.</p>
+          <button type="button" class="btn btn-primary" (click)="resetFilters()">
+            Clear All Filters
+          </button>
+        </div>
+      }
+
+    </main>
+
+  </div>
+
+</div>
