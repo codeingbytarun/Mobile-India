@@ -23,7 +23,11 @@
     <div class="best-deal-banner card">
       <div class="deal-badge">Lowest Price Found</div>
       <div class="deal-info">
-        <span class="deal-price">₹{{ lowestPrice.toLocaleString('en-IN') }}</span>
+        @if (authService.isAuthenticated()) {
+          <span class="deal-price">₹{{ lowestPrice.toLocaleString('en-IN') }}</span>
+        } @else {
+          <span class="deal-price deal-price-locked">₹ ••••••</span>
+        }
         <span class="deal-context">Available in <strong>{{ comparisonListings.length }} verified local shops</strong> in {{ marketplace.currentCity() }}</span>
       </div>
     </div>
@@ -34,7 +38,7 @@
         <div class="compare-card card" [class.best-value]="item.price === lowestPrice">
           
           <!-- Best Value Badge Header -->
-          @if (item.price === lowestPrice) {
+          @if (authService.isAuthenticated() && item.price === lowestPrice) {
             <div class="best-value-ribbon">
               ★ Lowest Price Deal
             </div>
@@ -51,9 +55,18 @@
 
             <!-- Price Box -->
             <div class="matrix-price-box">
-              <span class="matrix-price">₹{{ item.price.toLocaleString('en-IN') }}</span>
-              @if (item.mrp > item.price) {
-                <span class="price-strike">₹{{ item.mrp.toLocaleString('en-IN') }}</span>
+              @if (authService.isAuthenticated()) {
+                <span class="matrix-price">₹{{ item.price.toLocaleString('en-IN') }}</span>
+                @if (item.mrp > item.price) {
+                  <span class="price-strike">₹{{ item.mrp.toLocaleString('en-IN') }}</span>
+                }
+              } @else {
+                <div class="compare-locked-box" (click)="marketplace.isAuthModalOpen.set(true)" title="Sign in to view price">
+                  <span class="locked-price-blur">₹ ••••••</span>
+                  <button type="button" class="btn-unlock-price">
+                    <span>🔒 Login to View</span>
+                  </button>
+                </div>
               }
             </div>
 

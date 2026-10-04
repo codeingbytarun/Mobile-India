@@ -1,7 +1,9 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { MarketplaceService } from '../../services/marketplace.service';
+import { CartService } from '../../services/cart.service';
+import { LeadService, LeadItem } from '../../services/lead.service';
 import { PhoneListing } from '../../models/phone.model';
 
 @Component({
@@ -11,8 +13,28 @@ import { PhoneListing } from '../../models/phone.model';
   templateUrl: './buyer-dashboard.component.html',
   styleUrl: './buyer-dashboard.component.css'
 })
-export class BuyerDashboardComponent {
+export class BuyerDashboardComponent implements OnInit {
   marketplace = inject(MarketplaceService);
+  cartService = inject(CartService);
+  leadService = inject(LeadService);
+  private router = inject(Router);
+
+  myInquiries = signal<LeadItem[]>([]);
+
+  ngOnInit(): void {
+    if (this.marketplace.currentUser()?.role === 'shopkeeper') {
+      this.router.navigate(['/seller/dashboard']);
+      return;
+    }
+    this.cartService.loadCart().subscribe();
+    if (this.marketplace.currentUser()) {
+      this.leadService.getMyInquiries().subscribe(res => {
+        if (res.success && res.data) {
+          this.myInquiries.set(res.data);
+        }
+      });
+    }
+  }
 
   get user() {
     return this.marketplace.currentUser();
@@ -23,14 +45,26 @@ export class BuyerDashboardComponent {
   }
 
   get totalCartPrice(): number {
-    return this.cartItems.reduce((acc, p) => acc + p.price, 0);
+    const sCart = this.cartService.cart();
+    if (sCart?.totalPrice !== undefined && sCart.totalPrice > 0) {
+      return sCart.totalPrice;
+    }
+    return this.cartItems.reduce((acc, p) => acc + (p.price || 0), 0);
   }
 
   get totalCartMrp(): number {
-    return this.cartItems.reduce((acc, p) => acc + (p.mrp || p.price), 0);
+    const sCart = this.cartService.cart();
+    if (sCart?.totalMrp !== undefined && sCart.totalMrp > 0) {
+      return sCart.totalMrp;
+    }
+    return this.cartItems.reduce((acc, p) => acc + (p.mrp || p.price || 0), 0);
   }
 
   get totalSavings(): number {
+    const sCart = this.cartService.cart();
+    if (sCart?.totalSavings !== undefined && sCart.totalSavings > 0) {
+      return sCart.totalSavings;
+    }
     return Math.max(0, this.totalCartMrp - this.totalCartPrice);
   }
 
@@ -51,7 +85,7 @@ export class BuyerDashboardComponent {
     if (shop?.googleMapsUrl) {
       window.open(shop.googleMapsUrl, '_blank');
     } else {
-      const query = encodeURIComponent(`${phone.shopName}, ${phone.shopLocality}, ${phone.shopCity}`);
+      const query = encodeURIComponent(`${phone.shopName || ''}, ${phone.shopLocality || ''}, ${phone.shopCity || ''}`);
       window.open(`https://www.google.com/maps/search/?api=1&query=${query}`, '_blank');
     }
   }

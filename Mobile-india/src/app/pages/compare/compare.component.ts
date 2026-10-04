@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { MarketplaceService } from '../../services/marketplace.service';
+import { MetaService } from '../../services/meta.service';
+import { AuthService } from '../../services/auth.service';
 import { PhoneListing } from '../../models/phone.model';
 
 @Component({
@@ -14,13 +16,36 @@ import { PhoneListing } from '../../models/phone.model';
 })
 export class CompareComponent implements OnInit {
   marketplace = inject(MarketplaceService);
+  authService = inject(AuthService);
+  private metaService = inject(MetaService);
 
-  comparableModels = ['iPhone 13', 'OnePlus 11R 5G', 'Galaxy S21 FE 5G', 'Pixel 7'];
+  comparableModels: string[] = ['iPhone 13', 'OnePlus 11R 5G', 'Galaxy S21 FE 5G', 'Pixel 7'];
   selectedModel = 'iPhone 13';
   comparisonListings: PhoneListing[] = [];
+  isLoading = false;
 
   ngOnInit(): void {
-    this.updateComparison();
+    this.metaService.getBrands().subscribe(res => {
+      if (res.success && Array.isArray(res.data) && res.data.length > 0) {
+        const dynamicModels: string[] = [];
+        res.data.forEach(brand => {
+          if (brand.models && Array.isArray(brand.models)) {
+            dynamicModels.push(...brand.models);
+          }
+        });
+        if (dynamicModels.length > 0) {
+          this.comparableModels = dynamicModels;
+          if (!this.comparableModels.includes(this.selectedModel)) {
+            this.selectedModel = this.comparableModels[0];
+          }
+        }
+      }
+      this.updateComparison();
+    });
+
+    if (this.comparisonListings.length === 0) {
+      this.updateComparison();
+    }
   }
 
   onModelChange(): void {
@@ -28,7 +53,15 @@ export class CompareComponent implements OnInit {
   }
 
   updateComparison(): void {
-    this.comparisonListings = this.marketplace.getCompareListings(this.selectedModel);
+    this.isLoading = true;
+    this.marketplace.comparePhones(this.selectedModel, this.marketplace.currentCity()).subscribe(res => {
+      this.isLoading = false;
+      if (res.success && Array.isArray(res.data)) {
+        this.comparisonListings = res.data;
+      } else {
+        this.comparisonListings = this.marketplace.getCompareListings(this.selectedModel);
+      }
+    });
   }
 
   get lowestPrice(): number {
@@ -37,8 +70,6 @@ export class CompareComponent implements OnInit {
   }
 
   openWhatsApp(phone: PhoneListing): void {
-    this.marketplace.recordLead(phone.id);
-    const url = this.marketplace.getWhatsAppUrl(phone);
-    window.open(url, '_blank');
+    this.marketplace.requestInquiry(phone, 'whatsapp');
   }
 }

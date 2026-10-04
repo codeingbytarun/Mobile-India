@@ -7,10 +7,18 @@
       <span class="badge badge-verified">Shopkeeper Partner Program</span>
       <h1 class="benefits-title">Digitize Your Mobile Shop in 2 Minutes</h1>
       <p class="benefits-sub">
-        Join 100+ local mobile shop owners getting direct walk-in customers and WhatsApp inquiries every day.
+        Join 100+ local mobile shop owners getting direct walk-in customers and WhatsApp inquiries every day. Verified via secure Email OTP.
       </p>
 
       <div class="perks-list">
+        <div class="perk-item">
+          <div class="perk-icon">✉️</div>
+          <div class="perk-text">
+            <strong>100% Free Email Verification</strong>
+            <span>Verify your merchant profile instantly with a 6-digit email OTP. No upfront costs or SMS fees.</span>
+          </div>
+        </div>
+
         <div class="perk-item">
           <div class="perk-icon">🏪</div>
           <div class="perk-text">
@@ -23,7 +31,7 @@
           <div class="perk-icon">💬</div>
           <div class="perk-text">
             <strong>Direct Customer WhatsApp Leads</strong>
-            <span>Zero middleman commission. Buyers contact you directly on your phone or WhatsApp.</span>
+            <span>Zero middleman commission. Buyers contact you directly on your verified phone or WhatsApp.</span>
           </div>
         </div>
 
@@ -37,160 +45,284 @@
       </div>
     </div>
 
-    <!-- Right: Registration Form -->
+    <!-- Right: Registration Wizard -->
     <div class="form-panel card">
-      <div class="form-header">
-        <h2>Register Your Shop</h2>
-        <p>Enter your store details below to create your merchant account.</p>
+      
+      <!-- Wizard Step Indicator -->
+      <div class="wizard-header">
+        <div class="wizard-step" [class.active]="currentStep() === 'details'" [class.done]="currentStep() === 'email-otp'">
+          <span class="step-num">{{ currentStep() === 'email-otp' ? '✓' : '1' }}</span>
+          <span class="step-title">Store Details</span>
+        </div>
+        <div class="wizard-line" [class.active-line]="currentStep() === 'email-otp'"></div>
+        <div class="wizard-step" [class.active]="currentStep() === 'email-otp'">
+          <span class="step-num">2</span>
+          <span class="step-title">Email Verification</span>
+        </div>
       </div>
 
-      <form (submit)="$event.preventDefault(); onSubmit()" class="reg-form">
-        
-        <div class="form-group">
-          <label>Shop / Business Name *</label>
-          <input
-            type="text"
-            class="form-input"
-            placeholder="e.g. Balaji Mobile Care"
-            [(ngModel)]="shopData.shopName"
-            name="shopName"
-            required
-          />
+      <!-- Alerts -->
+      @if (errorMessage) {
+        <div class="alert error-alert">
+          ⚠️ {{ errorMessage }}
+        </div>
+      }
+      @if (statusMessage) {
+        <div class="alert status-alert">
+          ℹ️ {{ statusMessage }}
+        </div>
+      }
+
+      <!-- STEP 1: Store & Owner Details -->
+      @if (currentStep() === 'details') {
+        <div class="form-header">
+          <h2>Register Your Shop</h2>
+          <p>Fill in your store details. We will verify your email with a 6-digit code.</p>
         </div>
 
-        <div class="form-row">
+        <form (submit)="$event.preventDefault(); initiateVerification()" class="reg-form">
+          
           <div class="form-group">
-            <label>Proprietor / Owner Name *</label>
+            <label for="shopName">Shop / Business Name *</label>
             <input
+              id="shopName"
               type="text"
               class="form-input"
-              placeholder="e.g. Rajesh Kumar"
-              [(ngModel)]="shopData.ownerName"
-              name="ownerName"
+              placeholder="e.g. Balaji Mobile Care"
+              [(ngModel)]="shopData.shopName"
+              name="shopName"
+              (blur)="onShopNameBlur()"
               required
             />
           </div>
 
-          <div class="form-group">
-            <label>City *</label>
-            <select [(ngModel)]="shopData.city" name="city" class="form-input">
-              @for (city of marketplace.availableCities; track city) {
-                <option [value]="city">{{ city }}</option>
-              }
-            </select>
-          </div>
-        </div>
-
-        <div class="form-row">
-          <div class="form-group">
-            <label>Calling Phone Number *</label>
-            <div class="phone-input-wrap">
-              <span class="country-code">+91</span>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="ownerName">Proprietor / Owner Name *</label>
               <input
-                type="tel"
-                class="form-input phone-field"
-                placeholder="98290 12345"
-                [(ngModel)]="shopData.phone"
-                name="phone"
+                id="ownerName"
+                type="text"
+                class="form-input"
+                placeholder="e.g. Rajesh Kumar"
+                [(ngModel)]="shopData.ownerName"
+                name="ownerName"
                 required
               />
             </div>
+
+            <div class="form-group">
+              <label for="citySelect">City *</label>
+              <select id="citySelect" [(ngModel)]="shopData.city" name="city" class="form-input">
+                @for (city of marketplace.availableCities; track city) {
+                  <option [value]="city">{{ city }}</option>
+                }
+              </select>
+            </div>
           </div>
 
-          <div class="form-group">
-            <label>WhatsApp Number</label>
-            <div class="phone-input-wrap">
-              <span class="country-code">+91</span>
+          <!-- Email Address (Key Feature) -->
+          <div class="form-group highlight-group">
+            <label for="shopEmail">
+              Business Email Address *
+              <span class="badge-free">✉️ Free Email OTP Verification</span>
+            </label>
+            <input
+              id="shopEmail"
+              type="email"
+              class="form-input email-field"
+              placeholder="e.g. balajimobile@gmail.com"
+              [(ngModel)]="shopData.email"
+              name="email"
+              required
+            />
+            <span class="help-text">
+              We'll send a 6-digit verification code to this email to activate your store.
+            </span>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="callingPhone">Calling Phone Number *</label>
+              <div class="phone-input-wrap">
+                <span class="country-code">+91</span>
+                <input
+                  id="callingPhone"
+                  type="tel"
+                  class="form-input phone-field"
+                  placeholder="98290 12345"
+                  [(ngModel)]="shopData.phone"
+                  name="phone"
+                  required
+                />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="whatsappPhone">WhatsApp Number</label>
+              <div class="phone-input-wrap">
+                <span class="country-code">+91</span>
+                <input
+                  id="whatsappPhone"
+                  type="tel"
+                  class="form-input phone-field"
+                  placeholder="Same as phone or WhatsApp"
+                  [(ngModel)]="shopData.whatsapp"
+                  name="whatsapp"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="locality">Market Hub / Locality *</label>
               <input
-                type="tel"
-                class="form-input phone-field"
-                placeholder="Same as phone or WhatsApp"
-                [(ngModel)]="shopData.whatsapp"
-                name="whatsapp"
+                id="locality"
+                type="text"
+                class="form-input"
+                placeholder="e.g. Malviya Nagar, Gaurav Tower"
+                [(ngModel)]="shopData.locality"
+                name="locality"
+                required
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="openHours">Operating Hours</label>
+              <input
+                id="openHours"
+                type="text"
+                class="form-input"
+                placeholder="e.g. 10:00 AM - 9:30 PM"
+                [(ngModel)]="shopData.openHours"
+                name="openHours"
               />
             </div>
           </div>
+
+          <div class="form-group">
+            <label for="address">Full Physical Shop Address *</label>
+            <textarea
+              id="address"
+              class="form-input"
+              rows="2"
+              placeholder="Shop number, floor, market complex name, landmark..."
+              [(ngModel)]="shopData.address"
+              name="address"
+              required
+            ></textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="googleMapsUrl">Google Maps Location Link (for Buyer Navigation)</label>
+            <div class="map-input-wrap">
+              <span class="map-icon">📍</span>
+              <input
+                id="googleMapsUrl"
+                type="url"
+                class="form-input map-field"
+                placeholder="e.g. https://maps.app.goo.gl/... or paste Google Maps pin"
+                [(ngModel)]="shopData.googleMapsUrl"
+                name="googleMapsUrl"
+              />
+            </div>
+            <span class="help-text">
+              💡 <em>How to get:</em> Open Google Maps → Search shop → Tap <strong>Share</strong> → Tap <strong>Copy link</strong>.
+            </span>
+          </div>
+
+          <div class="form-group">
+            <label>Select Storefront Theme Photo</label>
+            <div class="photo-selector-grid">
+              @for (opt of imageOptions; track opt.url) {
+                <div
+                  class="photo-opt-card"
+                  [class.selected-photo]="shopData.image === opt.url"
+                  (click)="shopData.image = opt.url"
+                >
+                  <img [src]="opt.url" [alt]="opt.label" />
+                  <span>{{ opt.label }}</span>
+                </div>
+              }
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-primary submit-btn" [disabled]="isSubmitting">
+            @if (!isSubmitting) {
+              <span>Verify Email & Register Shop &rarr;</span>
+            } @else {
+              <span>Sending verification code...</span>
+            }
+          </button>
+
+          <p class="terms-note">
+            By registering, you confirm that your shop is a legitimate physical mobile store adhering to testing warranties.
+          </p>
+
+        </form>
+      }
+
+      <!-- STEP 2: Email OTP Verification -->
+      @if (currentStep() === 'email-otp') {
+        <div class="form-header">
+          <h2>Verify Your Shop Email</h2>
+          <p>We have sent a 6-digit verification code to your email.</p>
         </div>
 
-        <div class="form-row">
+        <!-- Store Overview Pill -->
+        <div class="verification-summary-card">
+          <div class="summary-icon">✉️</div>
+          <div class="summary-info">
+            <span class="summary-title">{{ shopData.shopName }}</span>
+            <span class="summary-sub">Proprietor: {{ shopData.ownerName }}</span>
+            <span class="summary-email"><strong>Target Email:</strong> {{ shopData.email }}</span>
+          </div>
+        </div>
+
+        <form (submit)="$event.preventDefault(); verifyAndRegister()" class="reg-form">
+          
           <div class="form-group">
-            <label>Market Hub / Locality *</label>
+            <label for="otpCodeInput">Enter 6-Digit Email Verification Code</label>
             <input
+              id="otpCodeInput"
               type="text"
-              class="form-input"
-              placeholder="e.g. Malviya Nagar, Gaurav Tower"
-              [(ngModel)]="shopData.locality"
-              name="locality"
+              class="form-input otp-field"
+              placeholder="••••••"
+              maxlength="6"
+              [(ngModel)]="otpCode"
+              name="otpCode"
+              autofocus
               required
             />
+            <span class="help-text">
+              Check your Inbox, Updates, or Spam folder for an email from <strong>MobiMarket</strong>.
+            </span>
           </div>
 
-          <div class="form-group">
-            <label>Operating Hours</label>
-            <input
-              type="text"
-              class="form-input"
-              placeholder="e.g. 10:00 AM - 9:30 PM"
-              [(ngModel)]="shopData.openHours"
-              name="openHours"
-            />
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label>Full Physical Shop Address *</label>
-          <textarea
-            class="form-input"
-            rows="2"
-            placeholder="Shop number, floor, market complex name, landmark..."
-            [(ngModel)]="shopData.address"
-            name="address"
-            required
-          ></textarea>
-        </div>
-
-        <div class="form-group">
-          <label>Google Maps Location Link (for Buyer Turn-by-Turn Navigation)</label>
-          <div class="map-input-wrap">
-            <span class="map-icon">📍</span>
-            <input
-              type="url"
-              class="form-input map-field"
-              placeholder="e.g. https://maps.app.goo.gl/... or paste Google Maps pin"
-              [(ngModel)]="shopData.googleMapsUrl"
-              name="googleMapsUrl"
-            />
-          </div>
-          <span class="help-text">
-            💡 <em>How to get:</em> Open Google Maps app → Search your shop → Tap <strong>Share</strong> → Tap <strong>Copy link</strong> and paste here.
-          </span>
-        </div>
-
-        <div class="form-group">
-          <label>Select Storefront Theme Photo</label>
-          <div class="photo-selector-grid">
-            @for (opt of imageOptions; track opt.url) {
-              <div
-                class="photo-opt-card"
-                [class.selected-photo]="shopData.image === opt.url"
-                (click)="shopData.image = opt.url"
-              >
-                <img [src]="opt.url" [alt]="opt.label" />
-                <span>{{ opt.label }}</span>
-              </div>
+          <button type="submit" class="btn btn-primary submit-btn" [disabled]="isVerifying">
+            @if (!isVerifying) {
+              <span>Verify & Launch Storefront &rarr;</span>
+            } @else {
+              <span>Verifying & creating store...</span>
             }
+          </button>
+
+          <div class="otp-actions-bar">
+            <button 
+              type="button" 
+              class="btn-text" 
+              (click)="resendOtp()" 
+              [disabled]="resendCountdown() > 0 || isSubmitting">
+              Resend verification code @if (resendCountdown() > 0) { <span>in ({{ resendCountdown() }}s)</span> }
+            </button>
+            <button type="button" class="btn-text edit-link" (click)="editDetails()">
+              &larr; Edit Details / Change Email
+            </button>
           </div>
-        </div>
 
-        <button type="submit" class="btn btn-primary submit-btn">
-          Create Digital Storefront & Open Dashboard →
-        </button>
+        </form>
+      }
 
-        <p class="terms-note">
-          By registering, you confirm that your shop is a legitimate physical mobile store adhering to testing warranties for buyers.
-        </p>
-
-      </form>
     </div>
 
   </div>

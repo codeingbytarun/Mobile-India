@@ -1,116 +1,78 @@
-@if (marketplace.isAuthModalOpen()) {
-  <div class="modal-overlay" (click)="close()">
-    <div class="modal-card card" (click)="$event.stopPropagation()">
-      
-      <!-- Close Button -->
-      <button type="button" class="close-x" (click)="close()">✕</button>
+<div class="modal-backdrop" (click)="close.emit()">
+  <div class="modal-card" (click)="$event.stopPropagation()">
+    <button class="close-btn" (click)="close.emit()">&times;</button>
 
-      <!-- Tabs: Buyer vs Shopkeeper -->
-      <div class="tabs-header">
-        <button
-          type="button"
-          class="tab-btn"
-          [class.active-tab]="activeTab === 'buyer'"
-          (click)="activeTab = 'buyer'"
-        >
-          👤 Buyer Login
-        </button>
-        <button
-          type="button"
-          class="tab-btn"
-          [class.active-tab]="activeTab === 'shopkeeper'"
-          (click)="activeTab = 'shopkeeper'"
-        >
-          🏪 Shopkeeper Login
-        </button>
+    <div class="modal-header">
+      <h2 class="title">Welcome to Mobi<span>Market</span></h2>
+      <p class="subtitle">
+        {{ step() === 'input' ? 'Sign in with your Email address' : 'Enter the 6-digit code sent to your email' }}
+      </p>
+    </div>
+
+    <!-- Alert Messages -->
+    <div class="alert error" *ngIf="errorMessage()">{{ errorMessage() }}</div>
+    <div class="alert success" *ngIf="successMessage() && !errorMessage()">{{ successMessage() }}</div>
+
+    <!-- STEP 1: Enter Email -->
+    <form *ngIf="step() === 'input'" (ngSubmit)="sendOtp()">
+      <div class="form-group">
+        <label>Email Address</label>
+        <input 
+          type="email" 
+          [(ngModel)]="email" 
+          name="email" 
+          placeholder="e.g. yourname@gmail.com" 
+          required 
+          autofocus />
       </div>
 
-      <!-- Tab 1: Buyer Login -->
-      @if (activeTab === 'buyer') {
-        <div class="tab-body">
-          <div class="auth-header-text">
-            <h3>Login to Connect with Local Shops</h3>
-            <p>Enter your details to initiate WhatsApp chat or call directly with verified mobile store owners.</p>
-          </div>
+      <button type="submit" class="submit-btn" [disabled]="isLoading()">
+        <span *ngIf="!isLoading()">Get Verification Code &rarr;</span>
+        <span *ngIf="isLoading()">Sending code...</span>
+      </button>
+    </form>
 
-          <form (submit)="$event.preventDefault(); submitBuyerLogin()">
-            <div class="form-group">
-              <label>Your Full Name *</label>
-              <input
-                type="text"
-                class="form-input"
-                placeholder="e.g. Rahul Sharma"
-                [(ngModel)]="buyerName"
-                name="buyerName"
-                required
-              />
-            </div>
+    <!-- STEP 2: Enter OTP -->
+    <form *ngIf="step() === 'otp'" (ngSubmit)="verifyOtp()">
+      <div class="form-group">
+        <label>6-Digit Verification Code</label>
+        <input 
+          type="text" 
+          class="otp-input" 
+          [(ngModel)]="otp" 
+          name="otp" 
+          maxlength="6" 
+          placeholder="••••••" 
+          required 
+          autofocus />
+      </div>
 
-            <div class="form-group">
-              <label>Mobile Number (for WhatsApp) *</label>
-              <div class="phone-input-wrap">
-                <span class="country-code">+91</span>
-                <input
-                  type="tel"
-                  class="form-input phone-field"
-                  placeholder="98765 43210"
-                  [(ngModel)]="buyerPhone"
-                  name="buyerPhone"
-                  required
-                />
-              </div>
-            </div>
+      <div class="form-group">
+        <label>Your Name (Optional for new users)</label>
+        <input 
+          type="text" 
+          [(ngModel)]="name" 
+          name="name" 
+          placeholder="e.g. Tarun Baliyan" />
+      </div>
 
-            <div class="trust-notice">
-              🔒 Your contact is only shared with the specific shopkeeper you inquire with.
-            </div>
+      <button type="submit" class="submit-btn" [disabled]="isLoading()">
+        <span *ngIf="!isLoading()">Verify & Continue</span>
+        <span *ngIf="isLoading()">Verifying...</span>
+      </button>
 
-            <button type="submit" class="btn btn-primary submit-btn">
-              Continue & Inquire Now
-            </button>
-          </form>
-        </div>
-      }
-
-      <!-- Tab 2: Shopkeeper Login -->
-      @if (activeTab === 'shopkeeper') {
-        <div class="tab-body">
-          <div class="auth-header-text">
-            <h3>Shopkeeper Merchant Portal</h3>
-            <p>Manage your inventory, update prices, mark sold phones, and track customer inquiries.</p>
-          </div>
-
-          <form (submit)="$event.preventDefault(); submitShopkeeperLogin()">
-            <div class="form-group">
-              <label>Registered Mobile Number *</label>
-              <div class="phone-input-wrap">
-                <span class="country-code">+91</span>
-                <input
-                  type="tel"
-                  class="form-input phone-field"
-                  placeholder="e.g. 98290 12345 (Sharma Telecom)"
-                  [(ngModel)]="shopkeeperPhone"
-                  name="shopkeeperPhone"
-                  required
-                />
-              </div>
-              <span class="help-text">Tip: For demo, enter <strong>9829012345</strong> to login to Sharma Telecom.</span>
-            </div>
-
-            <button type="submit" class="btn btn-primary submit-btn">
-              Login to Merchant Dashboard
-            </button>
-
-            <div class="register-prompt">
-              <span>New shop owner?</span>
-              <a routerLink="/register-shop" (click)="close()" class="reg-link">
-                Register Your Shop on MobiMarket →
-              </a>
-            </div>
-          </form>
-        </div>
-      }
-
-    </div>
+      <div class="resend-row">
+        <button 
+          type="button" 
+          class="link-btn" 
+          (click)="resendOtp()" 
+          [disabled]="resendCountdown() > 0 || isLoading()">
+          Resend code <span *ngIf="resendCountdown() > 0">({{ resendCountdown() }}s)</span>
+        </button>
+        <button type="button" class="link-btn change-btn" (click)="step.set('input')">
+          Change email
+        </button>
+      </div>
+    </form>
   </div>
-}
+</div>

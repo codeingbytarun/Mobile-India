@@ -2,6 +2,9 @@ import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { MarketplaceService } from '../../services/marketplace.service';
+import { ShopService } from '../../services/shop.service';
+import { LeadService } from '../../services/lead.service';
+import { AuthService } from '../../services/auth.service';
 import { PhoneListing } from '../../models/phone.model';
 import { Shop } from '../../models/shop.model';
 
@@ -15,19 +18,39 @@ import { Shop } from '../../models/shop.model';
 export class PhoneDetailComponent implements OnInit {
   private route = inject(ActivatedRoute);
   marketplace = inject(MarketplaceService);
+  authService = inject(AuthService);
+  private shopService = inject(ShopService);
+  private leadService = inject(LeadService);
 
   phone: PhoneListing | undefined;
   shop: Shop | undefined;
   selectedImageIndex = 0;
+  isLoading = false;
 
   ngOnInit(): void {
     this.route.paramMap.subscribe(params => {
       const id = params.get('id');
       if (id) {
-        this.phone = this.marketplace.getPhoneById(id);
-        if (this.phone) {
-          this.shop = this.marketplace.getShopById(this.phone.shopId);
-        }
+        this.isLoading = true;
+        this.marketplace.getPhoneById(id).subscribe(res => {
+          this.isLoading = false;
+          if (res.success && res.data) {
+            this.phone = res.data;
+            if (this.phone.shop) {
+              this.shop = this.phone.shop as any;
+            } else if (this.phone.shopId) {
+              this.loadShopDetails(this.phone.shopId);
+            }
+          }
+        });
+      }
+    });
+  }
+
+  private loadShopDetails(shopId: string): void {
+    this.shopService.getShopByIdOrSlug(shopId).subscribe(res => {
+      if (res.success && res.data?.shop) {
+        this.shop = res.data.shop;
       }
     });
   }

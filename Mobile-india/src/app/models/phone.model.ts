@@ -2,11 +2,11 @@ export type PhoneCondition = 'Pristine' | 'Like New' | 'Good' | 'Fair';
 
 export interface PhoneListing {
   id: string;
-  brand: 'Apple' | 'Samsung' | 'OnePlus' | 'Xiaomi' | 'Vivo' | 'Realme' | 'Google' | 'Other';
+  brand: string;
   model: string;
-  ram: string;
+  ram?: string;
   storage: string;
-  color: string;
+  color?: string;
   price: number;
   mrp: number;
   condition: PhoneCondition;
@@ -26,6 +26,20 @@ export interface PhoneListing {
   viewsCount: number;
   leadsCount: number;
   createdAt: string;
+  updatedAt?: string;
+  shop?: {
+    id: string;
+    name: string;
+    ownerName?: string;
+    locality: string;
+    city: string;
+    phone: string;
+    whatsapp: string;
+    verified: boolean;
+    rating: number;
+    distanceKm?: number;
+    googleMapsUrl?: string;
+  };
 }
 
 export interface PhoneFilterState {
@@ -39,4 +53,24 @@ export interface PhoneFilterState {
   maxDistanceKm: number;
   onlyBillBox: boolean;
   onlyWithWarranty: boolean;
+}
+
+export interface ComparePhoneItem {
+  id: string;
+  model: string;
+  brand: string;
+  storage: string;
+  condition: PhoneCondition;
+  price: number;
+  mrp: number;
+  batteryHealth?: number;
+  billBoxAvailable: boolean;
+  warranty: string;
+  images: string[];
+  shopId: string;
+  shopName: string;
+  shopLocality: string;
+  shopDistanceKm: number;
+  shopPhone: string;
+  shopWhatsapp: string;
 }

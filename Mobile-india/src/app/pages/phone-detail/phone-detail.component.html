@@ -56,7 +56,7 @@
           <div class="header-tags">
             <span class="badge badge-verified">{{ phone.shopLocality }}</span>
             <span class="badge badge-condition" [ngClass]="{'badge-pristine': phone.condition === 'Pristine'}">{{ phone.condition }}</span>
-            @if (discountPercent > 0) {
+            @if (authService.isAuthenticated() && discountPercent > 0) {
               <span class="badge badge-discount">Save {{ discountPercent }}%</span>
             }
           </div>
@@ -65,9 +65,24 @@
           <p class="product-color">Color: <strong>{{ phone.color }}</strong></p>
 
           <div class="price-container">
-            <span class="price-val">₹{{ phone.price.toLocaleString('en-IN') }}</span>
-            @if (phone.mrp > phone.price) {
-              <span class="price-strike-large">MRP ₹{{ phone.mrp.toLocaleString('en-IN') }}</span>
+            @if (authService.isAuthenticated()) {
+              <span class="price-val">₹{{ phone.price.toLocaleString('en-IN') }}</span>
+              @if (phone.mrp > phone.price) {
+                <span class="price-strike-large">MRP ₹{{ phone.mrp.toLocaleString('en-IN') }}</span>
+              }
+            } @else {
+              <div class="locked-detail-box">
+                <div class="locked-detail-row">
+                  <span class="locked-detail-price">₹ ••••••</span>
+                  <span class="badge-buyer-only">🔒 Buyer Login Required</span>
+                </div>
+                <p class="locked-detail-sub">
+                  Live store pricing and warranty terms are reserved for verified buyers. Sign in with your email in seconds to reveal this deal.
+                </p>
+                <button type="button" class="btn btn-primary btn-unlock-detail" (click)="marketplace.isAuthModalOpen.set(true)">
+                  <span>🔓 Sign In with Email to View Price &rarr;</span>
+                </button>
+              </div>
             }
           </div>
 

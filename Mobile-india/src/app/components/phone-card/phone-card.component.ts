@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { PhoneListing } from '../../models/phone.model';
 import { MarketplaceService } from '../../services/marketplace.service';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-phone-card',
@@ -15,6 +16,7 @@ export class PhoneCardComponent {
   @Input({ required: true }) phone!: PhoneListing;
 
   marketplace = inject(MarketplaceService);
+  authService = inject(AuthService);
 
   get discountPercent(): number {
     if (!this.phone.mrp || this.phone.mrp <= this.phone.price) return 0;
@@ -33,5 +35,10 @@ export class PhoneCardComponent {
   openWhatsApp(event: Event): void {
     event.stopPropagation();
     this.marketplace.requestInquiry(this.phone, 'whatsapp');
+  }
+
+  unlockPrice(event: Event): void {
+    event.stopPropagation();
+    this.marketplace.isAuthModalOpen.set(true);
   }
 }

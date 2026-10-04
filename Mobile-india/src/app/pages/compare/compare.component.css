@@ -209,6 +209,58 @@
   color: var(--text-muted);
 }
 
+.deal-price-locked {
+  font-family: monospace;
+  letter-spacing: 2px;
+  color: #64748b;
+}
+
+.compare-locked-box {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  background: #f8fafc;
+  border: 1.5px dashed #cbd5e1;
+  padding: 6px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.compare-locked-box:hover {
+  background: #f1f5f9;
+  border-color: #6366f1;
+}
+
+.locked-price-blur {
+  font-family: monospace;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #94a3b8;
+  letter-spacing: 2px;
+  user-select: none;
+}
+
+.btn-unlock-price {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: #4f46e5;
+  color: #ffffff;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.btn-unlock-price:hover {
+  background: #4338ca;
+}
+
 @media (max-width: 640px) {
   .best-deal-banner {
     flex-direction: column;

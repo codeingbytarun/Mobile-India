@@ -12,7 +12,7 @@
           <span class="badge badge-discount">Verified Buyer Account</span>
         </div>
         <p class="buyer-contact">
-          Mobile: {{ user ? '+91 ' + user.phone : 'Not logged in' }}
+          {{ user ? (user.email ? 'Email: ' + user.email : (user.phone ? 'Mobile: +91 ' + user.phone : 'Verified Member')) : 'Not logged in' }}
         </p>
       </div>
     </div>

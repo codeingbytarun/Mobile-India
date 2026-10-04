@@ -9,7 +9,7 @@
       <span class="badge badge-condition" [ngClass]="{'badge-pristine': phone.condition === 'Pristine'}">
         {{ phone.condition }}
       </span>
-      @if (discountPercent > 0) {
+      @if (authService.isAuthenticated() && discountPercent > 0) {
         <span class="badge badge-discount">
           {{ discountPercent }}% OFF
         </span>
@@ -44,12 +44,22 @@
 
     <!-- Price Row -->
     <div class="price-row">
-      <div class="price-box">
-        <span class="price-main">₹{{ phone.price.toLocaleString('en-IN') }}</span>
-        @if (phone.mrp > phone.price) {
-          <span class="price-strike">₹{{ phone.mrp.toLocaleString('en-IN') }}</span>
-        }
-      </div>
+      @if (authService.isAuthenticated()) {
+        <div class="price-box">
+          <span class="price-main">₹{{ phone.price.toLocaleString('en-IN') }}</span>
+          @if (phone.mrp > phone.price) {
+            <span class="price-strike">₹{{ phone.mrp.toLocaleString('en-IN') }}</span>
+          }
+        </div>
+      } @else {
+        <div class="price-locked-box" (click)="unlockPrice($event)" title="Click to sign in and view price">
+          <span class="locked-price-blur">₹ ••••••</span>
+          <button type="button" class="btn-unlock-price">
+            <span class="lock-icon">🔒</span>
+            <span>View Price</span>
+          </button>
+        </div>
+      }
     </div>
 
     <!-- Shop Info Block -->

@@ -25,7 +25,7 @@
     >
       All Brands
     </button>
-    @for (brand of marketplace.brands; track brand) {
+    @for (brand of availableBrands; track brand) {
       <button
         class="brand-chip"
         [class.active]="marketplace.filterState().brand === brand"
@@ -35,6 +35,20 @@
       </button>
     }
   </section>
+
+  <!-- Login Prompt Callout Banner (shown when unauthenticated) -->
+  @if (!authService.isAuthenticated()) {
+    <div class="login-prompt-banner card" (click)="marketplace.isAuthModalOpen.set(true)">
+      <div class="prompt-icon">🔒</div>
+      <div class="prompt-content">
+        <h4 class="prompt-heading">Phone prices are reserved for registered buyers</h4>
+        <p class="prompt-sub">Sign in with your email to unlock verified shop prices, test warranties, and contact local sellers directly.</p>
+      </div>
+      <button type="button" class="btn btn-unlock-banner">
+        Sign In with Email &rarr;
+      </button>
+    </div>
+  }
 
   <!-- Main Marketplace Layout (Sidebar + Grid) -->
   <div class="marketplace-layout">

@@ -238,6 +238,29 @@
   background-color: var(--primary-hover);
 }
 
+.seller-dash-link {
+  font-weight: 700 !important;
+  color: var(--primary) !important;
+}
+
+.seller-portal-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.portal-badge {
+  background: #eef2ff;
+  color: #4f46e5;
+  border: 1px solid #c7d2fe;
+  padding: 6px 16px;
+  border-radius: var(--radius-full);
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+}
+
 @media (max-width: 950px) {
   .location-box {
     display: none;
